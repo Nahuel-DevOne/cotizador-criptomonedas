@@ -1,6 +1,7 @@
 const criptomonedasSelect = document.querySelector('#criptomonedas');
 const monedaSelect = document.querySelector('#moneda');
 const formulario = document.querySelector('#formulario');
+const resultado = document.querySelector('#resultado');
 
 const objBusqueda = {
     moneda: '',
@@ -64,22 +65,74 @@ function submitFormulario(e){
         return;
     }
 
+    // Consultar la API con los resultados
+    consultarApi();
+
 }
 
 function mostrarAlerta(msg){
     const existeError = document.querySelector('.error');
-
     if(!existeError){
+        
         const divMensaje = document.createElement('div');
         divMensaje.classList.add('error');
-
+    
         // Mensaje de error
         divMensaje.textContent = msg;
-
+    
         formulario.appendChild(divMensaje);
-
-        setTimeout(() => {
+    
+        setTimeout(()=>{
             divMensaje.remove();
-        }, 3000);
+        }, 3000)
     }
 }
+
+function consultarApi(){
+    const { moneda, criptomoneda } = objBusqueda;
+
+    const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptomoneda}&tsyms=${moneda}`;
+
+    fetch(url)
+        .then(respuesta => respuesta.json())
+        .then(cotizacion => {
+            // console.log(cotizacion.DISPLAY[criptomoneda][moneda]);
+            mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
+        })
+}
+
+function mostrarCotizacionHTML(cotizacion){
+    
+    limpiarHTML();
+
+    const { PRICE, HIGHDAY, LOWDAY, CHANGEPCT24HOUR, LASTUPDATE } = cotizacion;
+
+    const precio = document.createElement('p');
+    precio.classList.add('precio');
+    precio.innerHTML = `El precio es: <span>${PRICE}</span>`;
+    
+    const precioAlto = document.createElement('p');
+    precioAlto.innerHTML = `<p>Precio más alto del día: <span>${HIGHDAY}</span></p>`
+    
+    const precioBajo = document.createElement('p');
+    precioBajo.innerHTML = `<p>Precio más bajo del día: <span>${LOWDAY}</span></p>`
+    
+    const ultimasHoras = document.createElement('p');
+    ultimasHoras.innerHTML = `<p>Variación últimas 24 horas del día: <span>${CHANGEPCT24HOUR}%</span></p>`
+    
+    const ultimaActualizacion = document.createElement('p');
+    ultimaActualizacion.innerHTML = `<p>Última actualización: <span>${LASTUPDATE}</span></p>`
+
+    resultado.appendChild(precio);
+    resultado.appendChild(precioAlto);
+    resultado.appendChild(ultimasHoras);
+    resultado.appendChild(ultimaActualizacion);
+}
+
+function limpiarHTML(){
+    while(resultado.firstChild){
+        resultado.removeChild(resultado.firstChild);
+    }
+}
+
+
