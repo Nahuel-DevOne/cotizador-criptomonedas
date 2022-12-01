@@ -21,14 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
     monedaSelect.addEventListener('change', leerValor);
 });
 
-function consultarCriptomonedas(){
+async function consultarCriptomonedas(){
     // 1. Se consulta a esta url con fetch
     const url = 'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=10&tsym=USD';
-
-    fetch(url)
-        .then(respuesta => respuesta.json()) // Se obtiene la respuesta, se convierte a json
-        .then(resultado => obtenerCriptomonedas(resultado.Data)) // Se obtiene el resultado, se llama a la función obtenerCriptomonedas
-        .then(criptomonedas => selectCriptomonedas(criptomonedas)) // Se arma el select de criptomonedas
+    // Código con fetch
+    // fetch(url)
+    //     .then(respuesta => respuesta.json()) // Se obtiene la respuesta, se convierte a json
+    //     .then(resultado => obtenerCriptomonedas(resultado.Data)) // Se obtiene el resultado, se llama a la función obtenerCriptomonedas
+    //     .then(criptomonedas => selectCriptomonedas(criptomonedas)) // Se arma el select de criptomonedas
+    // Código con async await, ya no se necesita el then, se usa await.
+    try {
+        const respuesta = await fetch(url);
+        const resultado = await respuesta.json();
+        const criptomonedas = await obtenerCriptomonedas(resultado.Data);
+        selectCriptomonedas(criptomonedas);
+    } catch(error){
+        console.log(error);
+    }    
 
 }
 
@@ -88,19 +97,28 @@ function mostrarAlerta(msg){
     }
 }
 
-function consultarApi(){
+async function consultarApi(){
     const { moneda, criptomoneda } = objBusqueda;
 
     const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptomoneda}&tsyms=${moneda}`;
 
     mostrarSpinner();
+    
+    // Usando fetch
+    // fetch(url)
+    //     .then(respuesta => respuesta.json())
+    //     .then(cotizacion => {
+    //         mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
+    //     })
 
-    fetch(url)
-        .then(respuesta => respuesta.json())
-        .then(cotizacion => {
-            // console.log(cotizacion.DISPLAY[criptomoneda][moneda]);
-            mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
-        })
+    // Usando async await    
+    try{
+        const respuesta = await fetch(url);
+        const cotizacion = await respuesta.json();
+        mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
+    } catch(error){
+        console.log(error);
+    } 
 }
 
 function mostrarCotizacionHTML(cotizacion){
